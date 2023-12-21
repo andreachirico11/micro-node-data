@@ -5,5 +5,6 @@ export default interface IEnvs extends ParsedVariables {
     PORT: number;
     BASE_URL: string;
     MONGO_URI: string;
+    MICRO_AUTH_URI: string;
   }
   

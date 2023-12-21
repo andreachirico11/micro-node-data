@@ -7,7 +7,8 @@ const defaultEnvs: IEnvs = {
   PORT: 1234,
   PRODUCTION: false,
   BASE_URL: '',
-  MONGO_URI: ''
+  MONGO_URI: '',
+  MICRO_AUTH_URI:''
 };
 
 let { error, parsed: preParsingVars } = config({});
@@ -37,14 +38,17 @@ export const {
   PORT = defaultEnvs.PORT,
   PRODUCTION = defaultEnvs.PRODUCTION,
   BASE_URL = defaultEnvs.BASE_URL,
-  MONGO_URI = defaultEnvs.MONGO_URI
+  MONGO_URI = defaultEnvs.MONGO_URI,
+  MICRO_AUTH_URI = defaultEnvs.MICRO_AUTH_URI
 } = parsedEnvs;
 
 log_info(
   {
     PORT,
     PRODUCTION,
-    BASE_URL
+    BASE_URL,
+    MONGO_URI,
+    MICRO_AUTH_URI
   },
   '--------- Actual Environments -------'
 );

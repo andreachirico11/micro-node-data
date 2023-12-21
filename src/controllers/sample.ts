@@ -3,9 +3,9 @@ import { SuccessResponse, ServerErrorResp } from "../types/ApiResponses";
 import { GENERIC } from "../types/ErrorCodes";
 import { log_info, log_error } from "../utils/log";
 import { Sample, SampleModel } from "../models/sample";
-import { RequestWithBodyAndid, RequestWithId, RequestWithPartialSampleBody } from "../types/Requests";
+import { RequestEmpty, RequestWithBodyAndid, RequestWithId, RequestWithPartialSampleBody } from "../types/Requests";
 
-export const getAll: RequestHandler = async (req, res) => {
+export const getAll: RequestHandler = async (req: RequestEmpty, res) => {
     try {
       log_info('Getting all samples');
       const result = await SampleModel.find({}) as unknown as Sample[];
