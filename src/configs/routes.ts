@@ -2,20 +2,24 @@ import { Router } from "express";
 import { getPing } from "../controllers/ping";
 import { unsupportedUrl } from "../controllers/unsuportedUrl";
 import { configRequest } from "../controllers/utils";
-import { put, remove, get, post, getAll } from "../controllers/sample";
 import { checkAuthToken } from "../controllers/auth";
+import { addTableIfDoesntExists, generateModelFromTable } from "../controllers/table";
+import { getAll, post, get, remove, put } from "../controllers/generic-cruds";
+import { cleanup } from "../controllers/cleanup";
 
 const router = Router();
 
 router.all('*', configRequest);
 
-const samplesRouter = Router();
-samplesRouter.delete("/:id", remove);
-samplesRouter.put("/:id", put);
-samplesRouter.get("/:id", get);
-samplesRouter.post("/", post);
-samplesRouter.get("/", getAll);
-router.use("/samples", checkAuthToken, samplesRouter);
+const crudRouter = Router();
+crudRouter.delete("/:id", remove);
+crudRouter.put("/:id", put);
+crudRouter.get("/:id", get);
+crudRouter.post("/", post);
+crudRouter.get("/", getAll);
+router.use("/:tableName", checkAuthToken, addTableIfDoesntExists, generateModelFromTable, crudRouter, cleanup);
+
+
 
 router.get('/ping', getPing);
 

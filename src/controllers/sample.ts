@@ -4,6 +4,7 @@ import { GENERIC } from "../types/ErrorCodes";
 import { log_info, log_error } from "../utils/log";
 import { Sample, SampleModel } from "../models/sample";
 import { RequestEmpty, RequestWithBodyAndid, RequestWithId, RequestWithPartialSampleBody } from "../types/Requests";
+import { GetSetRequestProps } from "../utils/GetSetAppInRequest";
 
 export const getAll: RequestHandler = async (req: RequestEmpty, res) => {
     try {
@@ -31,6 +32,25 @@ export const getAll: RequestHandler = async (req: RequestEmpty, res) => {
     }
   };
   
+  export const newPost: RequestHandler = async (req: RequestWithPartialSampleBody, res) => {
+    try {
+      const model = GetSetRequestProps.getDynamicModel(req), {body} = req;
+      log_info(body, 'Generating new ' + model.modelName + ' with following data');
+
+      model.init();
+
+      const {_id} = await new model(body).save();
+
+      const message = `Successfully created with id: ${_id}`;
+      log_info(message);
+      return new SuccessResponse(res, _id);
+    } catch (error) {
+      log_error(error, 'There was an error generating object');
+      return new ServerErrorResp(res, GENERIC);
+    }
+  };
+
+    
   export const post: RequestHandler = async ({body}: RequestWithPartialSampleBody, res) => {
     try {
       log_info(body, 'Generating new sample with following data');
