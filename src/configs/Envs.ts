@@ -6,7 +6,8 @@ import { log_info } from '../utils/log';
 const defaultEnvs: IEnvs = {
   PORT: 1234,
   PRODUCTION: false,
-  BASE_URL: ''
+  BASE_URL: '',
+  MONGO_URI: ''
 };
 
 let { error, parsed: preParsingVars } = config({});
@@ -35,7 +36,8 @@ export class NodeTlsHandler {
 export const {
   PORT = defaultEnvs.PORT,
   PRODUCTION = defaultEnvs.PRODUCTION,
-  BASE_URL = defaultEnvs.BASE_URL
+  BASE_URL = defaultEnvs.BASE_URL,
+  MONGO_URI = defaultEnvs.MONGO_URI
 } = parsedEnvs;
 
 log_info(

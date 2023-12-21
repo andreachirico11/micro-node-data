@@ -4,5 +4,6 @@ export default interface IEnvs extends ParsedVariables {
     PRODUCTION: boolean;
     PORT: number;
     BASE_URL: string;
+    MONGO_URI: string;
   }
   
