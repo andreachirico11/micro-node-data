@@ -1,31 +1,28 @@
-
 import { Request } from 'express';
-import { Sample } from '../models/sample';
 
+export type IdParams = { id: string };
+export type TableNameParams = { tableName: string };
 
-export type IdParams = {id: string};
-export type TableNameParams = {tableName: string};
+export type HeaderApiKey = { api_key: string };
+export type HeaderAuthorization = { authorization: string };
 
+export type PartialBody = Omit<Object, '_id'>;
 
-export type HeaderApiKey =  {api_key: string};
-export type HeaderAuthorization =  {authorization: string};
-
-
-export type PartialSampleBody = Omit<Sample, '_id'>;
-
-
-interface ProtectedRequest<TParams, Tbody, Tbody2> 
-extends Request<TParams & TableNameParams, Tbody, Tbody2> {
-    headers: HeaderApiKey & HeaderAuthorization;
+interface ProtectedRequest<TParams, Tbody, Tbody2>
+  extends Request<TParams & TableNameParams, Tbody, Tbody2> {
+  headers: HeaderApiKey & HeaderAuthorization;
 }
 
 export type RequestEmpty = ProtectedRequest<{}, {}, {}>;
 
 export type RequestWithId = ProtectedRequest<IdParams, {}, any>;
 
-export type RequestWithPartialSampleBody = ProtectedRequest<{}, {}, PartialSampleBody>;
+export type RequestWithBody = ProtectedRequest<{}, {}, PartialBody>;
 
-export type RequestWithBodyAndid = RequestWithId & RequestWithPartialSampleBody
+export type RequestWithBodyAndid = RequestWithId & RequestWithBody;
 
-export type AllProtectedRequests = RequestEmpty | RequestWithId | RequestWithPartialSampleBody | RequestWithBodyAndid;
-
+export type AllProtectedRequests =
+  | RequestEmpty
+  | RequestWithId
+  | RequestWithBody
+  | RequestWithBodyAndid;

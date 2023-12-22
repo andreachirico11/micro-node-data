@@ -1,7 +1,7 @@
 import { object, number, string, date, boolean } from 'yup';
 
 
-export const sample = object({
+export const validatorexample = object({
   name: string().required(),
   passwordLenght: number().required(),
   uppercaseLetters: boolean().required(),

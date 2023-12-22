@@ -5,7 +5,7 @@ import { ServerErrorResp, UnauthorizedResp } from '../types/ApiResponses';
 import { INTERNAL_SERVER } from '../types/ErrorCodes';
 import { AuthHelper } from '../configs/MicroHelper';
 import { isAuthErrorResponse } from '../helpers/MIcroAuthHelper';
-import { NodeTlsHandler } from '../configs/Envs';
+import { BYPASS_AUTH, NodeTlsHandler } from '../configs/Envs';
 
 export const checkAuthToken: RequestHandler = async (
   { headers: { api_key, authorization } }: AllProtectedRequests,
@@ -13,6 +13,11 @@ export const checkAuthToken: RequestHandler = async (
   next
 ) => {
   try {
+    if (BYPASS_AUTH) {
+      log_info('BYPASSING AUTHENTICATION');
+      return next();
+    }
+
     if (!!!api_key || !!!authorization) {
       log_error('Impossible to verify authorization');
       return new UnauthorizedResp(res, 'Missing Api key or token');
@@ -29,7 +34,6 @@ export const checkAuthToken: RequestHandler = async (
       log_error(response.errors, response.errCode);
       return new UnauthorizedResp(res, "invalid token");
     }
-  
 
     log_info('Token Valid');
     return next();

@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { ErrorCodes, UNAUTHORIZED, VALIDATION } from './ErrorCodes';
+import { ErrorCodes, INTERNAL_SERVER, UNAUTHORIZED, VALIDATION } from './ErrorCodes';
 
 const sender = (res: Response, status, json: any) => res.status(status).json(json);
 
@@ -19,8 +19,15 @@ abstract class ErrorResponse {
 }
 
 export class ServerErrorResp extends ErrorResponse {
-    constructor(res: Response, errCode: ErrorCodes) {
-        super(res, 500, errCode);
+    constructor(res: Response, errCode: ErrorCodes = INTERNAL_SERVER, errors: string[] = null) {
+        super(res, 500, errCode, errors);
+    }
+}
+
+
+export class ServerErrorRespWithMessage extends ServerErrorResp {
+    constructor(res: Response, message: string) {
+        super(res, INTERNAL_SERVER, [message]);
     }
 }
 

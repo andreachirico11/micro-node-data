@@ -1,16 +1,16 @@
 import { RequestHandler } from 'express';
-import { ServerErrorResp } from '../types/ApiResponses';
+import { ServerErrorResp, ServerErrorRespWithMessage } from '../types/ApiResponses';
 import { GENERIC } from '../types/ErrorCodes';
 import { log_info, log_error } from '../utils/log';
-import { RequestWithPartialSampleBody } from '../types/Requests';
+import { RequestWithBody } from '../types/Requests';
 import { MongoTable, MongoTableeModel } from '../models/mongoTable';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import generateColumnsFromBody from '../utils/columnGenerator';
-import schemaGenerator from '../utils/schemaGenerator';
+import { DynamicModel, UnhandledDataType } from '../utils/dynamicModel';
 
 
 export const addTableIfDoesntExists: RequestHandler = async (
-  req: RequestWithPartialSampleBody,
+  req: RequestWithBody,
   res,
   next
 ) => {
@@ -55,12 +55,16 @@ export const generateModelFromTable: RequestHandler = async (
   next
 ) => {
   try {
-    const mongoDoc = schemaGenerator(GetSetRequestProps.getTableModel(req));
-    log_info(mongoDoc.modelName + " generated successfully");
-    GetSetRequestProps.setDynamicModel(req, mongoDoc);
+    DynamicModel.generate(GetSetRequestProps.getTableModel(req));
+    log_info(DynamicModel.modelName + " generated successfully");
     return next();
   } catch (error) {
+    if (error instanceof UnhandledDataType) {
+      const message = 'The property: ' + error.propertyWhichCausedError + ' is not supported yet'
+      log_error(message);
+      return new ServerErrorRespWithMessage(res, message);
+    }
     log_error(error, 'There was an error generating the model');
-    return new ServerErrorResp(res, GENERIC);
+    return new ServerErrorResp(res);
   }
 };

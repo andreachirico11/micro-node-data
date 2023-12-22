@@ -4,8 +4,7 @@ import { unsupportedUrl } from "../controllers/unsuportedUrl";
 import { configRequest } from "../controllers/utils";
 import { checkAuthToken } from "../controllers/auth";
 import { addTableIfDoesntExists, generateModelFromTable } from "../controllers/table";
-import { getAll, post, get, remove, put } from "../controllers/generic-cruds";
-import { cleanup } from "../controllers/cleanup";
+import { getAll, post, get, remove, put } from "../controllers/cruds";
 
 const router = Router();
 
@@ -17,7 +16,7 @@ crudRouter.put("/:id", put);
 crudRouter.get("/:id", get);
 crudRouter.post("/", post);
 crudRouter.get("/", getAll);
-router.use("/:tableName", checkAuthToken, addTableIfDoesntExists, generateModelFromTable, crudRouter, cleanup);
+router.use("/:tableName", checkAuthToken, addTableIfDoesntExists, generateModelFromTable, crudRouter);
 
 
 
