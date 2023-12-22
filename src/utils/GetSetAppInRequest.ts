@@ -1,8 +1,7 @@
 import { Request } from 'express';
 import { MongoTable } from '../models/mongoTable';
-import { Model } from 'mongoose';
 
-const CLIENT_IP = "client_ip", ACTUAL_TABLE= "ACTUAL_TABLE", DYNAMIC_MODEL = "DYNAMIC_MODEL";
+const CLIENT_IP = "client_ip", ACTUAL_TABLE= "ACTUAL_TABLE", ACTUAL_TABLENAME= "ACTUAL_TABLENAME";
 
 export class GetSetRequestProps {
 
@@ -22,12 +21,11 @@ export class GetSetRequestProps {
         req[ACTUAL_TABLE] = t;
     }
 
-    
-    static getDynamicModel(req: Request) {
-        return req[DYNAMIC_MODEL] as Model<any>;
+    static getTableName(req: Request) {
+        return req[ACTUAL_TABLENAME] as string;
     }
 
-    static setDynamicModel(req: Request, t: Model<any>) {
-        req[DYNAMIC_MODEL] = t;
+    static setTableName(req: Request, t: string) {
+        req[ACTUAL_TABLENAME] = t;
     }
 }

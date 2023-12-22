@@ -3,21 +3,21 @@ import { getPing } from "../controllers/ping";
 import { unsupportedUrl } from "../controllers/unsuportedUrl";
 import { configRequest } from "../controllers/utils";
 import { checkAuthToken } from "../controllers/auth";
-import { addTableIfDoesntExists, generateModelFromTable } from "../controllers/table";
+import { addTableIfDoesntExists, generateModelFromTable, retrieveTableName } from "../controllers/table";
 import { getAll, post, get, remove, put } from "../controllers/cruds";
+import { dynamicValidator } from "../controllers/validators";
 
 const router = Router();
 
 router.all('*', configRequest);
 
 const crudRouter = Router();
-crudRouter.delete("/:id", remove);
-crudRouter.put("/:id", put);
-crudRouter.get("/:id", get);
-crudRouter.post("/", post);
-crudRouter.get("/", getAll);
-router.use("/:tableName", checkAuthToken, addTableIfDoesntExists, generateModelFromTable, crudRouter);
-
+crudRouter.delete("/:id",generateModelFromTable, remove);
+crudRouter.put("/:id", dynamicValidator, generateModelFromTable,  put);
+crudRouter.get("/:id", generateModelFromTable, get);
+crudRouter.post("/", addTableIfDoesntExists, dynamicValidator, generateModelFromTable, post);
+crudRouter.get("/", generateModelFromTable, getAll);
+router.use("/:tableName", retrieveTableName, checkAuthToken, crudRouter);
 
 
 router.get('/ping', getPing);

@@ -38,8 +38,8 @@ export class SeviceUnavailable extends ErrorResponse {
 }
 
 export class NotFoundResp extends ErrorResponse {
-    constructor(res: Response, errCode: ErrorCodes) {
-        super(res, 404, errCode);
+    constructor(res: Response, errCode: ErrorCodes, message: string = null) {
+        super(res, 404, errCode, [message]);
     }
 }
 

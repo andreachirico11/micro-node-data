@@ -8,7 +8,7 @@ import { isAuthErrorResponse } from '../helpers/MIcroAuthHelper';
 import { BYPASS_AUTH, NodeTlsHandler } from '../configs/Envs';
 
 export const checkAuthToken: RequestHandler = async (
-  { headers: { api_key, authorization } }: AllProtectedRequests,
+  { headers: { api_key, authorization }, params }: AllProtectedRequests,
   res,
   next
 ) => {
