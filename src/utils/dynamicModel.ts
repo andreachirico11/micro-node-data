@@ -1,15 +1,13 @@
-import columnTypes from '../configs/columnTypes';
-import { Column, MongoTable } from '../models/mongoTable';
+import { columnConfigs } from './columnConfigurators';
+import { MongoTable } from '../models/mongoTable';
 import { deleteModel, Model, model, Schema } from 'mongoose';
+import Column from '../types/Column';
 
-const estrapolateTypeConstructor = (c: Column) => {
-  return columnTypes(c).constructorType;
-};
 
 const reducer = (prevSchema: Object, c: Column) => {
   const { name, require } = c;
   try {
-    const newColumn = { require, type: estrapolateTypeConstructor(c) };
+    const newColumn = { require, type:  columnConfigs(c).constructorType};
     return { ...prevSchema, [name]: newColumn };
   } catch (e) {
     throw new UnhandledDataType(name);

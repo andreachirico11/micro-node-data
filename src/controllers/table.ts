@@ -5,9 +5,9 @@ import { log_info, log_error } from '../utils/log';
 import { AllProtectedRequests, RequestWithBody } from '../types/Requests';
 import { MongoTable, MongoTableeModel } from '../models/mongoTable';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
-import generateColumnsFromBody from '../utils/columnGenerator';
 import { DynamicModel, UnhandledDataType } from '../utils/dynamicModel';
 import tableRemover from '../utils/tableRemover';
+import { parseObjectToColumnDefinition } from '../utils/columnConfigurators';
 
 export const retrieveTableModel: RequestHandler = async (req: AllProtectedRequests, res, next) => {
   const { tableName } = req.params;
@@ -43,7 +43,7 @@ export const addTableIfDoesntExists: RequestHandler = async (req: RequestWithBod
     } 
     
     log_info('No table model was found, starting generation process');
-    const columns = generateColumnsFromBody(body);
+    const columns = parseObjectToColumnDefinition(body);
     log_info(
       columns.map((c) => JSON.stringify(c)),
       'These column will be generated for the new table: ' + tableName.toUpperCase()

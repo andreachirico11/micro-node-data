@@ -3,17 +3,17 @@ import { ObjectSchema, ValidationError } from 'yup';
 import { log_error, log_info } from '../utils/log';
 import { ValidationErrResp } from '../types/ApiResponses';
 import { RequestWithBody } from '../types/Requests';
-import { Column, MongoTable } from '../models/mongoTable';
+import { MongoTable } from '../models/mongoTable';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import { object } from 'yup';
 import tableRemover from '../utils/tableRemover';
-import columnTypes from '../configs/columnTypes';
+import { columnConfigs } from '../utils/columnConfigurators';
+import Column from '../types/Column';
 
-const typeValidator = (c: Column) => {
-  return columnTypes(c).validator;
-};
-
-const columnReducer = (schema: Object, c: Column) => ({ ...schema, [c.name]: typeValidator(c) });
+const columnReducer = (schema: Object, c: Column) => ({
+  ...schema,
+  [c.name]: columnConfigs(c).validator,
+});
 
 const generateValidatorSchemaFromTable = ({ columns }: MongoTable): ObjectSchema<any> => {
   return object(

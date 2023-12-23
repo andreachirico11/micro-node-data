@@ -1,10 +1,7 @@
 import { Document, model, Schema } from 'mongoose';
+import Column from '../types/Column';
 
-export interface Column {
-  name: string;
-  require: boolean;
-  columnType: string;
-}
+
 
 export interface MongoTable extends Document {
   _id: string;

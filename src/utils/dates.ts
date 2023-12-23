@@ -13,3 +13,8 @@ export function hourToMs(hour: number) {
 export function isDateInThePast(d: Date) {
   return Date.now() > d.getTime();
 }
+
+export function isDateValid(dateVal: string) {
+  const d =  new Date(dateVal);
+  return d.toString() !== 'Invalid Date' && !isNaN(d.valueOf());
+}
