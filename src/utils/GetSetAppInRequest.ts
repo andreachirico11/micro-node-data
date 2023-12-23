@@ -2,8 +2,7 @@ import { Request } from 'express';
 import { MongoTable } from '../models/mongoTable';
 
 const CLIENT_IP = 'client_ip',
-  ACTUAL_TABLE = 'ACTUAL_TABLE',
-  ACTUAL_TABLENAME = 'ACTUAL_TABLENAME';
+  ACTUAL_TABLE = 'ACTUAL_TABLE';
 
 export class GetSetRequestProps {
   static getClientIp(req: Request) {
@@ -20,13 +19,5 @@ export class GetSetRequestProps {
 
   static setTableModel(req: Request, t: MongoTable) {
     req[ACTUAL_TABLE] = t;
-  }
-
-  static getTableName(req: Request) {
-    return req[ACTUAL_TABLENAME] as string;
-  }
-
-  static setTableName(req: Request, t: string) {
-    req[ACTUAL_TABLENAME] = t;
   }
 }

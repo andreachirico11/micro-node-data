@@ -11,11 +11,12 @@ const router = Router();
 
 router.all('*', configRequest);
 
+router.post("/:tableName", checkAuthToken, addTableIfDoesntExists, dynamicValidator, generateModelFromTable, post);
+
 const crudRouter = Router();
 crudRouter.delete("/:id",generateModelFromTable, remove);
 crudRouter.put("/:id", dynamicValidator, generateModelFromTable,  put);
 crudRouter.get("/:id", generateModelFromTable, get);
-crudRouter.post("/", addTableIfDoesntExists, dynamicValidator, generateModelFromTable, post);
 crudRouter.get("/", generateModelFromTable, getAll);
 router.use("/:tableName", checkAuthToken, retrieveTableModel, crudRouter);
 
