@@ -1,22 +1,15 @@
+import columnTypes from '../configs/columnTypes';
 import { Column, MongoTable } from '../models/mongoTable';
 import { deleteModel, Model, model, Schema } from 'mongoose';
 
-const estrapolateTypeConstructor = (stringType: string) => {
-  switch (stringType) {
-    case 'boolean':
-      return Boolean;
-    case 'number':
-      return Number;
-    case 'string':
-        return String;
-    default:
-      throw new Error();
-  }
+const estrapolateTypeConstructor = (c: Column) => {
+  return columnTypes(c).constructorType;
 };
 
-const reducer = (prevSchema: Object, { columnType, name, require }: Column) => {
+const reducer = (prevSchema: Object, c: Column) => {
+  const { name, require } = c;
   try {
-    const newColumn = { require, type: estrapolateTypeConstructor(columnType) };
+    const newColumn = { require, type: estrapolateTypeConstructor(c) };
     return { ...prevSchema, [name]: newColumn };
   } catch (e) {
     throw new UnhandledDataType(name);
@@ -34,8 +27,6 @@ const schemaGenerator = ({ tableName, columns }: MongoTable) => {
   return model<any>(tableName, getSchema(columns));
 };
 
-
-
 export class DynamicModel {
   private static _model: Model<any>;
 
@@ -49,14 +40,14 @@ export class DynamicModel {
 
   public static async getAll() {
     const result = await this._model.find<Object>({});
-    const output = result.map(o => (this._model.castObject(o)));
+    const output = result.map((o) => this._model.castObject(o));
     deleteModel(this.modelName);
     return output;
   }
 
   public static async get(id: string) {
-    const result: Model<Object>  = await this._model.findById(id);
-    const output: Object = {...this._model.castObject(result)};
+    const result: Model<Object> = await this._model.findById(id);
+    const output: Object = { ...this._model.castObject(result) };
     deleteModel(this.modelName);
     return output;
   }
@@ -64,14 +55,14 @@ export class DynamicModel {
   public static async post(body: Object) {
     this._model.init();
     const result: Model<Object> = await new this._model(body).save();
-    const output: Object = {...this._model.castObject(result)};
+    const output: Object = { ...this._model.castObject(result) };
     deleteModel(this.modelName);
     return output;
   }
-  
+
   public static async put(body: Object, _id: string) {
     const result: Model<Object> = await this._model.findByIdAndUpdate(_id, body);
-    const output: Object = {...this._model.castObject(result), ...body};
+    const output: Object = { ...this._model.castObject(result), ...body };
     deleteModel(this.modelName);
     return output;
   }

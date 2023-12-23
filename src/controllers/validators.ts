@@ -5,25 +5,12 @@ import { ValidationErrResp } from '../types/ApiResponses';
 import { RequestWithBody } from '../types/Requests';
 import { Column, MongoTable } from '../models/mongoTable';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
-import { object, number, string, boolean } from 'yup';
+import { object } from 'yup';
 import tableRemover from '../utils/tableRemover';
+import columnTypes from '../configs/columnTypes';
 
 const typeValidator = (c: Column) => {
-  let output;
-  switch (c.columnType) {
-    case 'string':
-      output = string();
-      break;
-    case 'boolean':
-      output = boolean();
-      break;
-    case 'number':
-      output = number();
-      break;
-    default:
-      throw new Error();
-  }
-  return c.require ? output.required() : output;
+  return columnTypes(c).validator;
 };
 
 const columnReducer = (schema: Object, c: Column) => ({ ...schema, [c.name]: typeValidator(c) });
@@ -36,7 +23,7 @@ const generateValidatorSchemaFromTable = ({ columns }: MongoTable): ObjectSchema
 
 const printSchema = ({ fields }: ObjectSchema<any>) => {
   return Object.keys(fields).map((key) => {
-    return key + " --> " + fields[key]['type'];
+    return key + ' --> ' + fields[key]['type'];
   });
 };
 
