@@ -12,11 +12,11 @@ export const checkAuthToken: RequestHandler = async (
   res,
   next
 ) => {
+  if (BYPASS_AUTH) {
+    log_info('BYPASSING AUTHENTICATION');
+    return next();
+  }
   try {
-    if (BYPASS_AUTH) {
-      log_info('BYPASSING AUTHENTICATION');
-      return next();
-    }
 
     if (!!!api_key || !!!authorization) {
       log_error('Impossible to verify authorization');

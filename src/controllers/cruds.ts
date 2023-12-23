@@ -10,16 +10,10 @@ import {
 } from '../types/Requests';
 import { deleteModel } from 'mongoose';
 import { DynamicModel } from '../utils/dynamicModel';
+import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
+import { MongoTableeModel } from '../models/mongoTable';
+import tableRemover from '../utils/tableRemover';
 
-const cleanupModel = (modelName: string) => {
-  try {
-    log_info('deleting model ', modelName);
-    deleteModel(modelName);
-    log_info('deleted');
-  } catch (e) {
-    log_error(e, 'Error deleting model');
-  }
-};
 
 export const getAll: RequestHandler = async (req: RequestEmpty, res) => {
   try {
@@ -57,9 +51,11 @@ export const post: RequestHandler = async (req: RequestWithBody, res) => {
     const result = await DynamicModel.post(body);
     const message = `Successfully created with id: ${result['_id']}`;
     log_info(message);
+    tableRemover.reset();
     return new SuccessResponse(res, result);
   } catch (error) {
     log_error(error, 'There was an error generating object');
+    tableRemover.eliminateTableIfScheduled();
     return new ServerErrorResp(res, INTERNAL_SERVER);
   }
 };

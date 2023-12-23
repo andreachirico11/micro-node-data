@@ -1,11 +1,12 @@
 import { RequestHandler } from 'express';
-import { ISchema, ObjectSchema, StringSchema, ValidationError } from 'yup';
+import { ObjectSchema, ValidationError } from 'yup';
 import { log_error, log_info } from '../utils/log';
 import { ValidationErrResp } from '../types/ApiResponses';
 import { RequestWithBody } from '../types/Requests';
 import { Column, MongoTable } from '../models/mongoTable';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import { object, number, string, boolean } from 'yup';
+import tableRemover from '../utils/tableRemover';
 
 const typeValidator = (c: Column) => {
   let output;
@@ -54,6 +55,7 @@ export const dynamicValidator: RequestHandler = async (req: RequestWithBody, res
       message = e.message;
       log_error(message);
     }
+    tableRemover.eliminateTableIfScheduled();
     new ValidationErrResp(res, [message]);
   }
 };

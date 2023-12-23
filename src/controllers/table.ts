@@ -7,17 +7,24 @@ import { MongoTable, MongoTableeModel } from '../models/mongoTable';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import generateColumnsFromBody from '../utils/columnGenerator';
 import { DynamicModel, UnhandledDataType } from '../utils/dynamicModel';
+import tableRemover from '../utils/tableRemover';
 
-export const retrieveTableName: RequestHandler = async (req: AllProtectedRequests , _, next) => {
+export const retrieveTableModel: RequestHandler = async (req: AllProtectedRequests , _, next) => {
   const {tableName} = req.params;
-  if (!!tableName) {
-    log_info("Working with table : " + tableName);
-    GetSetRequestProps.setTableName(req, tableName);
-    return next();
-  } else {
+  if (!!!tableName) {
     log_info("No table name found");
     return new NotFoundResp(_, UNSUPPORTED_URL, "Missing table reference in url")
   }
+  log_info('Checking if the table ' + tableName + ' exists');
+  const found = (await MongoTableeModel.findOne({ tableName })) as unknown as MongoTable;
+  if (!!found) {
+    log_info(`The table exists: ${found._id}`);
+    GetSetRequestProps.setTableModel(req, found);
+  } else {
+    log_info('No table model was found, scheduling generation');
+    GetSetRequestProps.setTableName(req, tableName);
+  }
+  return next();
 };
 
 export const addTableIfDoesntExists: RequestHandler = async (req: RequestWithBody, res, next) => {
@@ -26,31 +33,26 @@ export const addTableIfDoesntExists: RequestHandler = async (req: RequestWithBod
       body,
       headers: { api_key },
     } = req;
-    const tableName = GetSetRequestProps.getTableName(req);    
-    log_info('Checking if the table ' + tableName + ' exists');
-    const found = (await MongoTableeModel.findOne({ tableName })) as unknown as MongoTable;
-    if (!!found) {
-      log_info(`The table exists: ${found._id}`);
-      GetSetRequestProps.setTableModel(req, found);
-      return next();
+    const tableToBeGenerated = GetSetRequestProps.getTableName(req);
+
+    if (!!tableToBeGenerated) {
+      const columns = generateColumnsFromBody(body);
+      log_info(
+        columns.map((c) => JSON.stringify(c)),
+        'These column will be generated for the new table: ' + tableToBeGenerated.toUpperCase()
+      );
+      MongoTableeModel.init();
+      const result = (await new MongoTableeModel({
+        appApiKey: api_key,
+        tableName: tableToBeGenerated,
+        columns,
+      }).save()) as unknown as MongoTable;
+      log_info(`Successfully created table with id: ${result._id}`);
+      GetSetRequestProps.setTableModel(req, result);
+      GetSetRequestProps.setTableName(req, null);
+      tableRemover.scheduleTableForElimination(result._id);
     }
 
-    log_info('No table model was found, starting generation');
-    const columns = generateColumnsFromBody(body);
-    log_info(
-      columns.map((c) => JSON.stringify(c)),
-      'These column will be generated for the new table: ' + tableName.toUpperCase()
-    );
-
-    MongoTableeModel.init();
-    const result = (await new MongoTableeModel({
-      appApiKey: api_key,
-      tableName,
-      columns,
-    }).save()) as unknown as MongoTable;
-    log_info(`Successfully created table with id: ${result._id}`);
-
-    GetSetRequestProps.setTableModel(req, result);
     return next();
   } catch (error) {
     log_error(error, 'There was an error generating the table');
@@ -70,6 +72,7 @@ export const generateModelFromTable: RequestHandler = async (req, res, next) => 
       return new ServerErrorRespWithMessage(res, message);
     }
     log_error(error, 'There was an error generating the model');
+    tableRemover.eliminateTableIfScheduled()
     return new ServerErrorResp(res);
   }
 };
