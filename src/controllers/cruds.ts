@@ -8,10 +8,7 @@ import {
   RequestWithBodyAndid,
   RequestWithId,
 } from '../types/Requests';
-import { deleteModel } from 'mongoose';
-import { DynamicModel } from '../utils/dynamicModel';
-import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
-import { MongoTableeModel } from '../models/mongoTable';
+import { DynamicModel } from '../models/dynamicModel';
 import tableRemover from '../utils/tableRemover';
 
 

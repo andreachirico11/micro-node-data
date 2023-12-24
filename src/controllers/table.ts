@@ -5,9 +5,11 @@ import { log_info, log_error } from '../utils/log';
 import { AllProtectedRequests, RequestWithBody } from '../types/Requests';
 import { MongoTable, MongoTableeModel } from '../models/mongoTable';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
-import { DynamicModel, UnhandledDataType } from '../utils/dynamicModel';
+import { DynamicModel } from '../models/dynamicModel';
 import tableRemover from '../utils/tableRemover';
 import { parseObjectToColumnDefinition } from '../utils/columnConfigurators';
+import { UnhandledDataType } from '../types/Errors';
+import dynamicSchemaGenerator from '../utils/dynamicSchemaGenerator';
 
 export const retrieveTableModel: RequestHandler = async (req: AllProtectedRequests, res, next) => {
   const { tableName } = req.params;
@@ -18,11 +20,11 @@ export const retrieveTableModel: RequestHandler = async (req: AllProtectedReques
   log_info('Checking if the table ' + tableName + ' exists');
   const found = (await MongoTableeModel.findOne({ tableName })) as unknown as MongoTable;
   if (!!!found) {
-    const message = `The table <<${tableName} >> does not exists`; 
+    const message = `The table <<${tableName} >> does not exists`;
     log_error(message);
     return new ServerErrorResp(res, NON_EXISTENT);
   }
-  log_info("Table model retrieved"); 
+  log_info('Table model retrieved');
   GetSetRequestProps.setTableModel(req, found);
   return next();
 };
@@ -35,13 +37,13 @@ export const addTableIfDoesntExists: RequestHandler = async (req: RequestWithBod
       params: { tableName },
     } = req;
     const found = (await MongoTableeModel.findOne({ tableName })) as unknown as MongoTable;
-    
+
     if (!!found) {
       log_info(`The table exists: ${found._id}`);
       GetSetRequestProps.setTableModel(req, found);
       return next();
-    } 
-    
+    }
+
     log_info('No table model was found, starting generation process');
     const columns = parseObjectToColumnDefinition(body);
     log_info(
@@ -62,6 +64,11 @@ export const addTableIfDoesntExists: RequestHandler = async (req: RequestWithBod
 
     return next();
   } catch (error) {
+    if (error instanceof UnhandledDataType) {
+      const message = 'The property: ' + error.propertyWhichCausedError + ' is not supported yet';
+      log_error(message);
+      return new ServerErrorRespWithMessage(res, message);
+    }
     log_error(error, 'There was an error generating the table');
     return new ServerErrorResp(res, GENERIC);
   }
@@ -69,13 +76,16 @@ export const addTableIfDoesntExists: RequestHandler = async (req: RequestWithBod
 
 export const generateModelFromTable: RequestHandler = async (req, res, next) => {
   try {
-    DynamicModel.generate(GetSetRequestProps.getTableModel(req));
+    const schema = dynamicSchemaGenerator(GetSetRequestProps.getTableModel(req)).mongo();
+    log_info("Schema generated")
+    DynamicModel.generate(schema);
     log_info(DynamicModel.modelName + ' generated successfully');
     return next();
   } catch (error) {
     if (error instanceof UnhandledDataType) {
       const message = 'The property: ' + error.propertyWhichCausedError + ' is not supported yet';
       log_error(message);
+      tableRemover.eliminateTableIfScheduled();
       return new ServerErrorRespWithMessage(res, message);
     }
     log_error(error, 'There was an error generating the model');

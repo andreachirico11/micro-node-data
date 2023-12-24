@@ -1,6 +1,6 @@
 import * as y from 'yup';
 import { isDateValid } from './dates';
-import { ColumnTypeNotHandledError } from '../types/Errors';
+import { ColumnTypeNotHandledError, UnhandledDataType } from '../types/Errors';
 import HandledTypes from '../configs/HandledTypes';
 import Column from '../types/Column';
 
@@ -30,7 +30,7 @@ export const columnConfigs = (c: Column) => {
       validator = y.date();
       break;
     default:
-      throw new Error();
+    throw new UnhandledDataType(c.name);
   }
   if (c.require) {
     validator = validator.required();
@@ -43,7 +43,7 @@ export const columnConfigs = (c: Column) => {
 const isSupported = (stringType: any) => Object.values(HandledTypes).includes(stringType);
 
 const generateColumn = (name: string, value: any): Column => {
-  let columnType: any = typeof value, require = true;
+  let columnType: any = typeof value, require = true, children = null;
   if (value === null) {
     // HOW TO solve required problem
     // if a field is null will become of type undefined
@@ -55,7 +55,19 @@ const generateColumn = (name: string, value: any): Column => {
   }
   if (columnType === HandledTypes.undefined) require = false;
   if (columnType === HandledTypes.string && isDateValid(value)) columnType = HandledTypes.date;
-  return { name, require, columnType };
+  if (columnType === HandledTypes.object) {
+    if (Array.isArray(value)) {
+      columnType = HandledTypes.array;
+      if (typeof value[0] !== 'object') {
+        throw new UnhandledDataType(name);
+      }
+
+      children = parseObjectToColumnDefinition(value[0]);
+    } else {
+      children = parseObjectToColumnDefinition(value);
+    }
+  }
+  return { name, require, columnType, children };
 };
 
 export const parseObjectToColumnDefinition = (body: Object) => {

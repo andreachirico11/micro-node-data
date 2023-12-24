@@ -9,3 +9,14 @@ export class ColumnTypeNotHandledError implements Error {
     )}`;
   }
 }
+
+
+export class UnhandledDataType extends Error {
+  constructor(private propN: string) {
+    super();
+  }
+
+  get propertyWhichCausedError() {
+    return this.propN;
+  }
+}

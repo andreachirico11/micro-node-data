@@ -4,5 +4,7 @@ enum HandledTypes {
   number = 'number',
   date = 'date',
   undefined = 'undefined',
+  object = 'object',
+  array = 'array'
 }
 export default HandledTypes;
