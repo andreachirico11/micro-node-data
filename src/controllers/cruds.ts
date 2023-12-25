@@ -3,6 +3,7 @@ import { SuccessResponse, ServerErrorResp } from '../types/ApiResponses';
 import { GENERIC, INTERNAL_SERVER, NON_EXISTENT } from '../types/ErrorCodes';
 import { log_info, log_error } from '../utils/log';
 import {
+  DeleteRequest,
   RequestEmpty,
   RequestWithBody,
   RequestWithBodyAndid,
@@ -10,6 +11,7 @@ import {
 } from '../types/Requests';
 import { DynamicModel } from '../models/dynamicModel';
 import tableRemover from '../utils/tableRemover';
+import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 
 
 export const getAll: RequestHandler = async (req: RequestEmpty, res) => {
@@ -74,14 +76,19 @@ export const put: RequestHandler = async (req: RequestWithBodyAndid, res) => {
   }
 };
 
-export const remove: RequestHandler = async (req: RequestWithId, res) => {
+export const remove: RequestHandler = async (req: DeleteRequest, res) => {
   const {
     params: { id: _id },
+    headers: {drop_if_empty}
   } = req;
+  const dropFlag = drop_if_empty === 'true';
   try {
     log_info('Deleting objec with id: ' + _id);
-    if (!(await DynamicModel.delete(_id))) {
+    if (!(await DynamicModel.delete(_id, dropFlag))) {
       throw new Error();
+    }
+    if (dropFlag) {
+      await GetSetRequestProps.getTableModel(req).deleteOne();
     }
     const message = `Successfully deleted`;
     log_info(message);

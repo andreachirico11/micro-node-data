@@ -40,8 +40,14 @@ export abstract class DynamicModel {
     return output;
   }
 
-  public static async delete(_id: string) {
-    const hasBeenDeleted = !!(await this._model.findByIdAndDelete(_id));
+  public static async delete(_id: string, dropCollectionifEmpty = false) {
+    const count = await this._model.countDocuments();
+    let hasBeenDeleted =  true;
+    if (dropCollectionifEmpty && count === 1) {
+      await this._model.db.dropCollection(this._model.collection.name);
+    } else {
+      hasBeenDeleted = !!(await this._model.findByIdAndDelete(_id));
+    }
     deleteModel(this.modelName);
     return hasBeenDeleted;
   }
