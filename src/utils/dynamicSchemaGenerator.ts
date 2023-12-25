@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 import HandledTypes from '../configs/HandledTypes';
-import { MongoTableProps, MongoTable, MongoTableeModel } from '../models/mongoTable';
+import { CollectionConfigProps, CollectionConfig, CollectionConfigModel } from '../models/collectionConfig';
 import Column from '../types/Column';
 import { array, ObjectSchema, object } from 'yup';
 import { columnConfigs } from './columnConfigurators';
@@ -43,7 +43,7 @@ const getValidatorOrChildren = (c: Column) => {
   return columnConfigs(c).validator;
 };
 
-const schemaGenerator = ({ tableName, columns }: MongoTableProps) => {
+const schemaGenerator = ({ tableName, columns }: CollectionConfigProps) => {
   return model<any>(tableName, getSchema(columns));
 };
 
@@ -66,8 +66,8 @@ export const printSchema = ({ fields }: ObjectSchema<any>, indentation = '  ') =
   console.log('}');
 };
 
-export default (t: MongoTable) => {
-  const casted = MongoTableeModel.castObject(t) as MongoTableProps;
+export default (t: CollectionConfig) => {
+  const casted = CollectionConfigModel.castObject(t) as CollectionConfigProps;
   return {
     mongo: () => schemaGenerator(casted),
     yup: () => generateObjectSchema(casted.columns),

@@ -3,13 +3,14 @@ import { NotFoundResp, ServerErrorResp, ServerErrorRespWithMessage } from '../ty
 import { GENERIC, NON_EXISTENT, UNSUPPORTED_URL } from '../types/ErrorCodes';
 import { log_info, log_error } from '../utils/log';
 import { AllProtectedRequests, RequestWithBody } from '../types/Requests';
-import { MongoTable, MongoTableeModel } from '../models/mongoTable';
+import { CollectionConfig, CollectionConfigModel } from '../models/collectionConfig';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import { DynamicModel } from '../models/dynamicModel';
 import tableRemover from '../utils/tableRemover';
 import { parseObjectToColumnDefinition } from '../utils/columnConfigurators';
 import { UnhandledDataType } from '../types/Errors';
 import dynamicSchemaGenerator from '../utils/dynamicSchemaGenerator';
+import { CONFIGS_COLLECTION_NAME } from '../configs/Envs';
 
 export const retrieveTableModel: RequestHandler = async (req: AllProtectedRequests, res, next) => {
   const { tableName } = req.params;
@@ -18,7 +19,7 @@ export const retrieveTableModel: RequestHandler = async (req: AllProtectedReques
     return new NotFoundResp(res, UNSUPPORTED_URL, 'Missing table reference in url');
   }
   log_info('Checking if the table ' + tableName + ' exists');
-  const found = (await MongoTableeModel.findOne({ tableName })) as unknown as MongoTable;
+  const found = (await CollectionConfigModel.findOne({ tableName })) as unknown as CollectionConfig;
   if (!!!found) {
     const message = `The table <<${tableName} >> does not exists`;
     log_error(message);
@@ -36,7 +37,7 @@ export const addTableIfDoesntExists: RequestHandler = async (req: RequestWithBod
       headers: { api_key },
       params: { tableName },
     } = req;
-    const found = (await MongoTableeModel.findOne({ tableName })) as unknown as MongoTable;
+    const found = (await CollectionConfigModel.findOne({ tableName })) as unknown as CollectionConfig;
 
     if (!!found) {
       log_info(`The table exists: ${found._id}`);
@@ -45,17 +46,23 @@ export const addTableIfDoesntExists: RequestHandler = async (req: RequestWithBod
     }
 
     log_info('No table model was found, starting generation process');
+    if (tableName === CONFIGS_COLLECTION_NAME) {
+      const message = 'Table name is reserved';
+      log_error(message);
+      return new ServerErrorRespWithMessage(res, message);
+    }
+
     const columns = parseObjectToColumnDefinition(body);
     log_info(
       columns.map((c) => JSON.stringify(c)),
       'These column will be generated for the new table: ' + tableName.toUpperCase()
     );
-    MongoTableeModel.init();
-    const result = (await new MongoTableeModel({
+    CollectionConfigModel.init();
+    const result = (await new CollectionConfigModel({
       appApiKey: api_key,
       tableName,
       columns,
-    }).save()) as unknown as MongoTable;
+    }).save()) as unknown as CollectionConfig;
 
     log_info(`Successfully created table with id: ${result._id}`);
 

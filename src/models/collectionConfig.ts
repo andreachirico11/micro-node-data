@@ -1,15 +1,16 @@
 import { Document, model, Schema } from 'mongoose';
 import Column from '../types/Column';
+import { CONFIGS_COLLECTION_NAME } from '../configs/Envs';
 
 
 
-export interface MongoTableProps {
+export interface CollectionConfigProps {
   tableName: string;
   appApiKey: string;
   columns: Column[];
 }
 
-export type MongoTable  = Document & MongoTableProps;
+export type CollectionConfig  = Document & CollectionConfigProps;
 
 const ColSchema = new Schema(
   {
@@ -24,7 +25,7 @@ ColSchema.add(new Schema({
 }));
 
 
-const MongoTableSchema = new Schema(
+const schema = new Schema(
   {
     tableName: { type: String, require: true },
     appApiKey: { type: String, require: true },
@@ -36,4 +37,4 @@ const MongoTableSchema = new Schema(
   { versionKey: false }
 );
 
-export const MongoTableeModel = model('mongoTable', MongoTableSchema);
+export const CollectionConfigModel = model(CONFIGS_COLLECTION_NAME, schema);

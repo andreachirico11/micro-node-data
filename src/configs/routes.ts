@@ -11,6 +11,8 @@ const router = Router();
 
 router.all('*', configRequest);
 
+router.get('/ping', getPing);
+
 router.post("/:tableName", checkAuthToken, addTableIfDoesntExists, dynamicValidator, generateModelFromTable, post);
 
 const crudRouter = Router();
@@ -19,9 +21,6 @@ crudRouter.put("/:id", dynamicValidator, generateModelFromTable,  put);
 crudRouter.get("/:id", generateModelFromTable, get);
 crudRouter.get("/", generateModelFromTable, getAll);
 router.use("/:tableName", checkAuthToken, retrieveTableModel, crudRouter);
-
-
-router.get('/ping', getPing);
 
 router.use('*', unsupportedUrl);
 

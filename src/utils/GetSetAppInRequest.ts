@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { MongoTable } from '../models/mongoTable';
+import { CollectionConfig } from '../models/collectionConfig';
 
 const CLIENT_IP = 'client_ip',
   ACTUAL_TABLE = 'ACTUAL_TABLE';
@@ -14,10 +14,10 @@ export class GetSetRequestProps {
   }
 
   static getTableModel(req: Request) {
-    return req[ACTUAL_TABLE] as MongoTable;
+    return req[ACTUAL_TABLE] as CollectionConfig;
   }
 
-  static setTableModel(req: Request, t: MongoTable) {
+  static setTableModel(req: Request, t: CollectionConfig) {
     req[ACTUAL_TABLE] = t;
   }
 }

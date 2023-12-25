@@ -3,13 +3,13 @@ import { log_error, log_info } from '../utils/log';
 import { ServerErrorResp, SuccessResponse } from '../types/ApiResponses';
 import { GENERIC } from '../types/ErrorCodes';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
-import { PingModel } from '../models/ping';
+import { getDbState } from '../configs/mongoose';
 
 export const getPing: RequestHandler = async (req, res) => {
   try {
+
     log_info('Start ping');
-    const result = await PingModel.findOne();
-    const message = "Ping from db = " + result.ping
+    const message = "Ping from db = " + getDbState().toUpperCase()
     log_info(message);
     return new SuccessResponse(res, {message, host: GetSetRequestProps.getClientIp(req)});
   } catch (error) {

@@ -9,7 +9,8 @@ const defaultEnvs: IEnvs = {
   BASE_URL: '',
   MONGO_URI: '',
   MICRO_AUTH_URI:'',
-  BYPASS_AUTH: false
+  BYPASS_AUTH: false,
+  CONFIGS_COLLECTION_NAME: 'collection_config'
 };
 
 let { error, parsed: preParsingVars } = config({});
@@ -41,7 +42,8 @@ export const {
   BASE_URL = defaultEnvs.BASE_URL,
   MONGO_URI = defaultEnvs.MONGO_URI,
   MICRO_AUTH_URI = defaultEnvs.MICRO_AUTH_URI,
-  BYPASS_AUTH = defaultEnvs.BYPASS_AUTH
+  BYPASS_AUTH = defaultEnvs.BYPASS_AUTH,
+  CONFIGS_COLLECTION_NAME = defaultEnvs.CONFIGS_COLLECTION_NAME
 } = parsedEnvs;
 
 log_info(
@@ -51,7 +53,8 @@ log_info(
     BASE_URL,
     MONGO_URI,
     MICRO_AUTH_URI,
-    BYPASS_AUTH
+    BYPASS_AUTH,
+    CONFIGS_COLLECTION_NAME
   },
   '--------- Actual Environments -------'
 );

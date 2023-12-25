@@ -1,4 +1,4 @@
-import { MongoTableeModel } from "../models/mongoTable";
+import { CollectionConfigModel } from "../models/collectionConfig";
 import { log_error, log_info } from "./log";
 
 /**
@@ -18,7 +18,7 @@ class TableRemover {
     public async eliminateTableIfScheduled() {
         if (!this._id) return;
         try {
-            const result = !!await MongoTableeModel.findByIdAndDelete(this._id);
+            const result = !!await CollectionConfigModel.findByIdAndDelete(this._id);
             if(result) log_info("Table " + this._id + " has been deleted");
             this.reset();
         } catch(e) {

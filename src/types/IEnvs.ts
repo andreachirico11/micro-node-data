@@ -7,4 +7,5 @@ export default interface IEnvs extends ParsedVariables {
   MONGO_URI: string;
   MICRO_AUTH_URI: string;
   BYPASS_AUTH: boolean;
+  CONFIGS_COLLECTION_NAME: string;
 }
