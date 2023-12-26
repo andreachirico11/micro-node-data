@@ -2,7 +2,7 @@ import { RequestHandler } from 'express';
 import { NotFoundResp, ServerErrorResp, ServerErrorRespWithMessage } from '../types/ApiResponses';
 import { GENERIC, NON_EXISTENT, UNSUPPORTED_URL } from '../types/ErrorCodes';
 import { log_info, log_error } from '../utils/log';
-import { AllProtectedRequests, RequestWithBody } from '../types/Requests';
+import { AllProtectedRequests, RequestWithBody, RequestWithBodyAndQuery } from '../types/Requests';
 import { CollectionConfig, CollectionConfigModel } from '../models/collectionConfig';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import { DynamicModel } from '../models/dynamicModel';
@@ -10,7 +10,9 @@ import tableRemover from '../utils/tableRemover';
 import { parseObjectToColumnDefinition } from '../utils/columnConfigurators';
 import { UnhandledDataType } from '../types/Errors';
 import dynamicSchemaGenerator from '../utils/dynamicSchemaGenerator';
-import { CONFIGS_COLLECTION_NAME } from '../configs/Envs';
+import { CONFIGS_COLLECTION_NAME, DEFAULT_UNCHEKED_OPS } from '../configs/Envs';
+import { CrudOperations } from '../types/CrudOperations';
+import uncheckedOpsSplitter from '../utils/uncheckedOpsSplitter';
 
 export const retrieveTableModel: RequestHandler = async (req: AllProtectedRequests, res, next) => {
   const { tableName } = req.params;
@@ -30,12 +32,13 @@ export const retrieveTableModel: RequestHandler = async (req: AllProtectedReques
   return next();
 };
 
-export const addTableIfDoesntExists: RequestHandler = async (req: RequestWithBody, res, next) => {
+export const addTableIfDoesntExists: RequestHandler = async (req: RequestWithBodyAndQuery, res, next) => {
   try {
     const {
       body,
       headers: { api_key },
       params: { tableName },
+      query: {unchecked_operations}
     } = req;
     const found = (await CollectionConfigModel.findOne({ tableName })) as unknown as CollectionConfig;
 
@@ -56,11 +59,13 @@ export const addTableIfDoesntExists: RequestHandler = async (req: RequestWithBod
     log_info(
       columns.map((c) => JSON.stringify(c)),
       'These column will be generated for the new table: ' + tableName.toUpperCase()
-    );
+      );
+      log_info(unchecked_operations, "These operations will be free from auth checking");
     CollectionConfigModel.init();
     const result = (await new CollectionConfigModel({
       appApiKey: api_key,
       tableName,
+      unCheckedOperations: uncheckedOpsSplitter(unchecked_operations) || DEFAULT_UNCHEKED_OPS,
       columns,
     }).save()) as unknown as CollectionConfig;
 

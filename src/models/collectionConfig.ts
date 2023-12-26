@@ -1,6 +1,7 @@
 import { Document, model, Schema } from 'mongoose';
 import Column from '../types/Column';
 import { CONFIGS_COLLECTION_NAME } from '../configs/Envs';
+import { CrudOperations } from '../types/CrudOperations';
 
 
 
@@ -8,6 +9,7 @@ export interface CollectionConfigProps {
   tableName: string;
   appApiKey: string;
   columns: Column[];
+  unCheckedOperations:  CrudOperations[];
 }
 
 export type CollectionConfig  = Document & CollectionConfigProps;
@@ -29,6 +31,7 @@ const schema = new Schema(
   {
     tableName: { type: String, require: true },
     appApiKey: { type: String, require: true },
+    unCheckedOperations: [{type: String, enum: CrudOperations}],
     columns: {
       type: [ColSchema],
       require: true,

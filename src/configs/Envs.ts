@@ -2,6 +2,7 @@ import { config } from 'dotenv';
 import * as dotenvParseVariables from 'dotenv-parse-variables';
 import IEnvs from '../types/IEnvs';
 import { log_info } from '../utils/log';
+import { CrudOperations } from '../types/CrudOperations';
 
 const defaultEnvs: IEnvs = {
   PORT: 1234,
@@ -45,6 +46,8 @@ export const {
   BYPASS_AUTH = defaultEnvs.BYPASS_AUTH,
   CONFIGS_COLLECTION_NAME = defaultEnvs.CONFIGS_COLLECTION_NAME
 } = parsedEnvs;
+
+export const DEFAULT_UNCHEKED_OPS: CrudOperations[] = [CrudOperations.GET];
 
 log_info(
   {
